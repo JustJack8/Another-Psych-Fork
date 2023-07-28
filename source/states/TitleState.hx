@@ -21,11 +21,6 @@ import states.StoryMenuState;
 import states.OutdatedState;
 import states.MainMenuState;
 
-#if MODS_ALLOWED
-import sys.FileSystem;
-import sys.io.File;
-#end
-
 typedef TitleData =
 {
 
@@ -79,9 +74,6 @@ class TitleState extends MusicBeatState
 		Paths.clearStoredMemory();
 		Paths.clearUnusedMemory();
 
-		#if LUA_ALLOWED
-		Mods.pushGlobalMods();
-		#end
 		Mods.loadTopMod();
 
 		FlxG.fixedTimestep = false;
@@ -339,12 +331,8 @@ class TitleState extends MusicBeatState
 
 	function getIntroTextShit():Array<Array<String>>
 	{
-		#if MODS_ALLOWED
-		var firstArray:Array<String> = Mods.mergeAllTextsNamed('data/introText.txt', Paths.getPreloadPath());
-		#else
 		var fullText:String = Assets.getText(Paths.txt('introText'));
 		var firstArray:Array<String> = fullText.split('\n');
-		#end
 		var swagGoodArray:Array<Array<String>> = [];
 
 		for (i in firstArray)

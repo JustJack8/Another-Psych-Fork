@@ -129,29 +129,4 @@ class DiscordClient
 	
 	public static function resetClientID()
 		clientID = _defaultID;
-
-	#if MODS_ALLOWED
-	public static function loadModRPC()
-	{
-		var pack:Dynamic = Mods.getPack();
-		if(pack != null && pack.discordRPC != null && pack.discordRPC != clientID)
-		{
-			clientID = pack.discordRPC;
-			//trace('Changing clientID! $clientID, $_defaultID');
-		}
-	}
-	#end
-
-	#if LUA_ALLOWED
-	public static function addLuaCallbacks(lua:State) {
-		Lua_helper.add_callback(lua, "changeDiscordPresence", function(details:String, state:Null<String>, ?smallImageKey:String, ?hasStartTimestamp:Bool, ?endTimestamp:Float) {
-			changePresence(details, state, smallImageKey, hasStartTimestamp, endTimestamp);
-		});
-
-		Lua_helper.add_callback(lua, "changeDiscordClientID", function(?newID:String = null) {
-			if(newID == null) newID = _defaultID;
-			clientID = newID;
-		});
-	}
-	#end
 }

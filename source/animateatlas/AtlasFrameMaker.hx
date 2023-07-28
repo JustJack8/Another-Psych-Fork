@@ -92,18 +92,10 @@ class AtlasFrameMaker extends FlxFramesCollection
 		var bitmap:BitmapData = null;
 		var file:String = null;
 
-		#if MODS_ALLOWED
-		file = Paths.modsImages(key);
-		if (FileSystem.exists(file))
-			bitmap = BitmapData.fromFile(file);
-		else
-		#end
-		{
-			file = Paths.getPath('images/$key.png', IMAGE);
-			if (Assets.exists(file, IMAGE))
-				bitmap = Assets.getBitmapData(file);
-		}
-
+		file = Paths.getPath('images/$key.png', IMAGE);
+		if (Assets.exists(file, IMAGE))
+			bitmap = Assets.getBitmapData(file);
+		
 		if (bitmap != null) return FlxGraphic.fromBitmapData(bitmap, false, file);
 		return null;
 	}

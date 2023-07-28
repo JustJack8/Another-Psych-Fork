@@ -45,7 +45,6 @@ class GameOverSubstate extends MusicBeatSubstate
 	override function create()
 	{
 		instance = this;
-		PlayState.instance.callOnScripts('onGameOverStart', []);
 
 		super.create();
 	}
@@ -53,9 +52,7 @@ class GameOverSubstate extends MusicBeatSubstate
 	public function new(x:Float, y:Float, camX:Float, camY:Float)
 	{
 		super();
-
-		PlayState.instance.setOnScripts('inGameOver', true);
-
+		
 		Conductor.songPosition = 0;
 
 		boyfriend = new Character(x, y, characterName, true);
@@ -81,8 +78,6 @@ class GameOverSubstate extends MusicBeatSubstate
 	{
 		super.update(elapsed);
 
-		PlayState.instance.callOnScripts('onUpdate', [elapsed]);
-
 		if (controls.ACCEPT)
 		{
 			endBullshit();
@@ -103,7 +98,6 @@ class GameOverSubstate extends MusicBeatSubstate
 				MusicBeatState.switchState(new FreeplayState());
 
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
-			PlayState.instance.callOnScripts('onGameOverConfirm', [false]);
 		}
 		
 		if (boyfriend.animation.curAnim != null)
@@ -150,7 +144,6 @@ class GameOverSubstate extends MusicBeatSubstate
 		{
 			Conductor.songPosition = FlxG.sound.music.time;
 		}
-		PlayState.instance.callOnScripts('onUpdatePost', [elapsed]);
 	}
 
 	var isEnding:Bool = false;
@@ -175,7 +168,6 @@ class GameOverSubstate extends MusicBeatSubstate
 					MusicBeatState.resetState();
 				});
 			});
-			PlayState.instance.callOnScripts('onGameOverConfirm', [true]);
 		}
 	}
 

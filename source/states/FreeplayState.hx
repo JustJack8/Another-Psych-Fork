@@ -13,10 +13,6 @@ import states.editors.ChartingState;
 import substates.GameplayChangersSubstate;
 import substates.ResetScoreSubState;
 
-#if MODS_ALLOWED
-import sys.FileSystem;
-#end
-
 class FreeplayState extends MusicBeatState
 {
 	var songs:Array<SongMetadata> = [];
@@ -341,15 +337,6 @@ class FreeplayState extends MusicBeatState
 			persistentUpdate = false;
 			var songLowercase:String = Paths.formatToSongPath(songs[curSelected].songName);
 			var poop:String = Highscore.formatSong(songLowercase, curDifficulty);
-			/*#if MODS_ALLOWED
-			if(!sys.FileSystem.exists(Paths.modsJson(songLowercase + '/' + poop)) && !sys.FileSystem.exists(Paths.json(songLowercase + '/' + poop))) {
-			#else
-			if(!OpenFlAssets.exists(Paths.json(songLowercase + '/' + poop))) {
-			#end
-				poop = songLowercase;
-				curDifficulty = 1;
-				trace('Couldnt find file');
-			}*/
 			trace(poop);
 
 			try
@@ -384,9 +371,6 @@ class FreeplayState extends MusicBeatState
 			FlxG.sound.music.volume = 0;
 					
 			destroyFreeplayVocals();
-			#if MODS_ALLOWED
-			DiscordClient.loadModRPC();
-			#end
 		}
 		else if(controls.RESET)
 		{
