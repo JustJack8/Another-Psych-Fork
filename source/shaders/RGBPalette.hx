@@ -70,7 +70,7 @@ class RGBShaderReference
 			mult = parent.mult;
 		}
 	}
-	
+
 	private function set_r(value:FlxColor)
 	{
 		if(allowNew && value != _original.r) cloneOriginal();

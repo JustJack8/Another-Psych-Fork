@@ -3,10 +3,13 @@ package objects;
 // If you want to make a custom note type, you should search for:
 // "function set_noteType"
 
+import flixel.math.FlxPoint;
 import backend.NoteTypesConfig;
+//import shaders.ColorSwap;
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
 import objects.StrumNote;
+import math.Vector3;
 
 import flixel.math.FlxRect;
 
@@ -33,6 +36,19 @@ typedef NoteSplashData = {
 
 class Note extends FlxSprite
 {
+	public var row:Int = 0;
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
+	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
+
+	public var zIndex:Float = 0;
+	public var desiredZIndex:Float = 0;
+	public var z:Float = 0;
+	public var garbage:Bool = false; // if this is true, the note will be removed in the next update cycle
+	public var alphaMod:Float = 1;
+	public var alphaMod2:Float = 1; // TODO: unhardcode this shit lmao
+
+	public var mAngle:Float = 0;
+	public var bAngle:Float = 0;
 	public var extraData:Map<String, Dynamic> = new Map<String, Dynamic>();
 
 	public var strumTime:Float = 0;
@@ -65,6 +81,7 @@ class Note extends FlxSprite
 	public var rgbShader:RGBShaderReference;
 	public static var globalRgbShaders:Array<RGBPalette> = [];
 	public var inEditor:Bool = false;
+	//public var colorSwap:ColorSwap;
 
 	public var animSuffix:String = '';
 	public var gfNote:Bool = false;
@@ -117,6 +134,9 @@ class Note extends FlxSprite
 	public var hitsoundChartEditor:Bool = true;
 	public var hitsound:String = 'hitsound';
 
+	public var typeOffsetX:Float = 0; // used to offset notes, mainly for note types. use in place of offset.x and offset.y when offsetting notetypes
+	public var typeOffsetY:Float = 0;
+
 	private function set_multSpeed(value:Float):Float {
 		resizeByRatio(value / multSpeed);
 		multSpeed = value;
@@ -130,6 +150,7 @@ class Note extends FlxSprite
 		{
 			scale.y *= ratio;
 			updateHitbox();
+			defScale.copyFrom(scale);
 		}
 	}
 
@@ -242,7 +263,7 @@ class Note extends FlxSprite
 			alpha = 0.6;
 			multAlpha = 0.6;
 			hitsoundDisabled = true;
-			if(ClientPrefs.data.downScroll) flipY = true;
+			//if(ClientPrefs.data.downScroll) flipY = true;
 
 			offsetX += width / 2;
 			copyAngle = false;
@@ -268,6 +289,7 @@ class Note extends FlxSprite
 					prevNote.scale.y *= (6 / height); //Auto adjust note size
 				}
 				prevNote.updateHitbox();
+				prevNote.defScale.copyFrom(prevNote.scale);
 				// prevNote.setGraphicSize();
 			}
 
@@ -283,6 +305,7 @@ class Note extends FlxSprite
 			centerOffsets();
 			centerOrigin();
 		}
+		defScale.copyFrom(scale);
 		x += offsetX;
 	}
 
@@ -367,6 +390,7 @@ class Note extends FlxSprite
 		if(isSustainNote) {
 			scale.y = lastScaleY;
 		}
+		defScale.copyFrom(scale);
 		updateHitbox();
 
 		if(animName != null)
@@ -406,6 +430,21 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
+		if (isSustainNote)
+		{
+			if (prevNote != null && prevNote.isSustainNote)
+				zIndex = z + prevNote.zIndex;
+			else if (prevNote != null && !prevNote.isSustainNote)
+				zIndex = z + prevNote.zIndex - 1;
+		}
+		else
+			zIndex = z;
+
+		zIndex += desiredZIndex;
+		zIndex -= (mustPress == true ? 0 : 1);
+
+		//colorSwap.daAlpha = alphaMod * alphaMod2;
+
 		if (mustPress)
 		{
 			canBeHit = (strumTime > Conductor.songPosition - (Conductor.safeZoneOffset * lateHitMult) &&
@@ -434,6 +473,7 @@ class Note extends FlxSprite
 
 	override public function destroy()
 	{
+		defScale.put();
 		super.destroy();
 		_lastValidChecked = '';
 	}

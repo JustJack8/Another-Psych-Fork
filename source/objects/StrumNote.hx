@@ -1,13 +1,24 @@
 package objects;
 
+import flixel.math.FlxPoint;
 import shaders.RGBPalette;
 import shaders.RGBPalette.RGBShaderReference;
+import math.Vector3;
+//import shaders.ColorSwap;
 
 class StrumNote extends FlxSprite
 {
+	public var vec3Cache:Vector3 = new Vector3(); // for vector3 operations in modchart code
+	public var defScale:FlxPoint = FlxPoint.get(); // for modcharts to keep the scaling
+
+	public var zIndex:Float = 0;
+	public var desiredZIndex:Float = 0;
+	public var z:Float = 0;
+
+	//private var colorSwap:ColorSwap;
 	public var rgbShader:RGBShaderReference;
 	public var resetAnim:Float = 0;
-	private var noteData:Int = 0;
+	public var noteData:Int = 0;
 	public var direction:Float = 90;//plan on doing scroll directions soon -bb
 	public var downScroll:Bool = false;//plan on doing scroll directions soon -bb
 	public var sustainReduce:Bool = true;
@@ -22,8 +33,23 @@ class StrumNote extends FlxSprite
 		return value;
 	}
 
+	public function getZIndex()
+	{
+		var animZOffset:Float = 0;
+		if (animation.curAnim != null && animation.curAnim.name == 'confirm')
+			animZOffset += 1;
+		return z + desiredZIndex + animZOffset - (player == 0 ? 1 : 0);
+	}
+
+	function updateZIndex()
+	{
+		zIndex = getZIndex();
+	}
+
 	public var useRGBShader:Bool = true;
 	public function new(x:Float, y:Float, leData:Int, player:Int) {
+		//colorSwap = new ColorSwap();
+		//shader = colorSwap.shader;
 		rgbShader = new RGBShaderReference(this, Note.initializeGlobalRGBShader(leData));
 		rgbShader.enabled = false;
 		if(PlayState.SONG != null && PlayState.SONG.disableNoteRGB) useRGBShader = false;
@@ -127,6 +153,7 @@ class StrumNote extends FlxSprite
 					animation.addByPrefix('confirm', 'right confirm', 24, false);
 			}
 		}
+		defScale.copyFrom(scale);
 		updateHitbox();
 
 		if(lastAnim != null)
@@ -151,6 +178,9 @@ class StrumNote extends FlxSprite
 				resetAnim = 0;
 			}
 		}
+
+		updateZIndex();
+
 		super.update(elapsed);
 	}
 
@@ -160,7 +190,14 @@ class StrumNote extends FlxSprite
 		{
 			centerOffsets();
 			centerOrigin();
+			updateZIndex();
 		}
 		if(useRGBShader) rgbShader.enabled = (animation.curAnim != null && animation.curAnim.name != 'static');
+	}
+
+	override function destroy()
+	{
+		defScale.put();
+		super.destroy();
 	}
 }
